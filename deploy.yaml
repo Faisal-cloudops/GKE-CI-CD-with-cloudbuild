@@ -1,0 +1,70 @@
+imports:
+ - path: templates/cluster.jinja        
+   name: cluster.jinja
+ - path: templates/network.jinja
+   name: network.jinja
+ - path: templates/cloudbuild_trigger.jinja
+   name: cloudbuild_trigger.jinja
+
+###########################---Please define the user input under properties of each module---#############################
+############---Use # before the input to use default settings or input your values to user defined customisation ---######
+resources:                             
+ - name : two-node-cluster 
+   type: cluster.jinja        
+   properties:
+     #description: kubernetese-test-cluster # Define your custom description 
+     zones:
+     - us-central1-b                        # Define Zone A here
+     #- asia-southeast1-b                   # Define Zone B here
+     initialNodeCount: 2                    # Initial node count of cluster
+     #clusterversion: 1.12.8-gke.10         # Comment will setup a latest version of clusterversion
+     #machineType: n1-standard-2            # Compute instance type
+     #diskSize: 50                          # Disk size of the cluster
+     minNodeCount: 2                        # minimum autoscaling count
+     maxNodeCount: 5                        # max autoscaling count
+ - name: network
+   type: network.jinja
+   properties:
+     subnet-a: 10.50.0.0/16                 # Subnet CIDR Block
+     subnet-b: 10.100.0.0/16                # Subnet CIDR Block
+     #vpc_region: asia-southeast1           # Define Region here
+ - name: cloudbuild_trigger
+   type: cloudbuild_trigger.jinja
+   properties:  
+     GCP_ProjectId: project-kubernetes-242705                   # your project ID
+     Git_Repository_Name: github_ffaisalahmedd_welcome-demo     # Ex:- website_accountid_Repository-name (github/bitbucket/cloud-source-repository__user-account-name__repository-name , dont use http/https )  
+     trigger-description: welcome-trigger                       # Description of your trigger
+
+
+
+################---Outputs are defined Below No changes are needed---#################
+
+outputs:
+- name: Project-ID
+  value: $(ref.cloudbuild_trigger.projectId)
+- name: Name of cluster
+  value: $(ref.two-node-cluster.name)
+- name: description of the Cluster
+  value: $(ref.two-node-cluster.description)
+- name: Compute-Instance-Type
+  value: $(ref.two-node-cluster.machineType)
+- name: VPC-Region
+  value: $(ref.network.region)
+- name: locations-Of-Deployed-Cluster
+  value: $(ref.two-node-cluster.locations)
+- name: Cluster-Version
+  value: $(ref.two-node-cluster.ClusterVersion)
+- name: Initial-NodeCount
+  value: $(ref.two-node-cluster.NodeCount)
+- name: Min-Node-Count
+  value: $(ref.two-node-cluster.min_node_count)
+- name: Max-Node-Count
+  value: $(ref.two-node-cluster.max_node_count)
+- name: Disk-Size-In-GB
+  value: $(ref.two-node-cluster.diskSize)
+- name: Git Repository Name
+  value: $(ref.cloudbuild_trigger.repoName)
+- name: Subnet-A
+  value: $(ref.network.subnet-a)
+- name: Subnet-B
+  value: $(ref.network.subnet-b)

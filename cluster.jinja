@@ -1,0 +1,54 @@
+{% set  NETWORK_NAME = "my-vpc-cluster-custom-network" %}
+
+############---Below template will create the cluster, and all the variable parameters have to be set up in deploy.yaml file---############
+resources:
+- name: {{ env['name'] }}
+  type: container.v1.cluster
+  properties:
+    zone: {{ properties['zones'][0]| default ('us-central1-a') }}
+    cluster:
+      description: {{ properties['description'] | default ('kube_cluster') }}
+      initialClusterVersion: {{ properties['clusterversion'] | default ('latest') }}
+      locations: {{ properties['zones'] }}
+      network: $(ref.{{ NETWORK_NAME }}.selfLink)
+      subnetwork: $(ref.subnet-a.selfLink)
+      nodePools:
+      - name: {{ env['name'] }}-pool
+        initialNodeCount: {{ properties['initialNodeCount'] | default(1) }}
+        autoscaling: 
+          enabled: yes
+          min_node_count: {{properties ['minNodeCount'] | default(1) }}
+          max_node_count: {{properties ['maxNodeCount'] | default(2) }}
+        config:
+          machineType: {{ properties['machineType'] | default('g1-small') }}
+          diskSizeGb: {{ properties ['diskSize'] | default ('100')}}
+          oauthScopes:
+          - https://www.googleapis.com/auth/devstorage.read_only
+          - https://www.googleapis.com/auth/logging.write
+          - https://www.googleapis.com/auth/monitoring
+          - https://www.googleapis.com/auth/servicecontrol
+          - https://www.googleapis.com/auth/service.management.readonly
+          - https://www.googleapis.com/auth/trace.append
+        management:
+          autoUpgrade: true
+          autoRepair: true
+###############---Declare outputs here---##################
+outputs:
+- name: machineType
+  value: {{ properties['machineType'] | default('g1-small') }}
+- name: diskSize
+  value: {{ properties ['diskSize'] | default ('100')}}
+- name: ClusterVersion
+  value: {{ properties['clusterversion'] | default ('latest') }}
+- name: NodeCount
+  value: {{ properties['initialNodeCount'] | default(1) }}
+- name: locations
+  value: {{ properties['zones'][0]| default ('us-central1-a') }}
+- name: description
+  value:  {{ properties['description'] | default ('kube_cluster') }}
+- name: min_node_count
+  value: {{properties ['minNodeCount'] | default(1) }}
+- name: max_node_count
+  value: {{ properties ['maxNodeCount'] | default(1) }}
+- name: name
+  value: {{ env['name'] }}

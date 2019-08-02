@@ -1,0 +1,47 @@
+resources:
+- name: default-cluster
+  type: container.v1.cluster
+  properties:
+    zone: us-east1-b
+    cluster:
+      description: "My default cluster"
+      initialClusterVersion: '1.12.8-gke.10'
+      locations: [ 'us-east1-b', 'us-east1-c' ]
+      nodePools:
+      - name: cluster-pool
+        initialNodeCount: 2
+        config:
+          machineType: 'g1-small'
+          oauthScopes:
+          - https://www.googleapis.com/auth/devstorage.read_only
+          - https://www.googleapis.com/auth/logging.write
+          - https://www.googleapis.com/auth/monitoring
+          - https://www.googleapis.com/auth/servicecontrol
+          - https://www.googleapis.com/auth/service.management.readonly
+          - https://www.googleapis.com/auth/trace.append
+        management:
+          autoUpgrade: true
+          autoRepair: true
+
+- action: gcp-types/cloudbuild-v1:cloudbuild.projects.triggers.create
+  metadata:
+    runtimePolicy:
+    - CREATE
+  name: mybuildtrigger
+  properties:
+    description: default-cloudbuild-trigger
+    triggerTemplate:
+      branchName: ".*"
+      projectId: project-kubernetes-242705
+      repoName: github_ffaisalahmedd_welcome-demo
+    filename: cloudbuild.yaml
+- action: gcp-types/cloudbuild-v1:cloudbuild.projects.triggers.delete
+  metadata:
+    runtimePolicy:
+    - DELETE
+    dependsOn:
+    - mybuildtrigger
+  name: mybuildtrigger-delete
+  properties:
+    projectId: project-kubernetes-242705
+    triggerId: $(ref.mybuildtrigger.id)
