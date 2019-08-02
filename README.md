@@ -10,7 +10,7 @@ INSTRUCTIONS
 
 https://github.com/Faisal-cloudops/demo-for-gke/tree/master/welcome-demo-master
 
-2. make necessary changes like project name , region .
+2. make necessary changes like project name , region on cloudbuild.yaml
 
 3. once you commit the code the magic starts
 
