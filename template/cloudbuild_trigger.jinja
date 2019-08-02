@@ -1,0 +1,37 @@
+############---Below template will create the cloudbuild-trigger---############
+
+
+resources:
+- action: gcp-types/cloudbuild-v1:cloudbuild.projects.triggers.create
+  metadata:
+    runtimePolicy:
+    - CREATE
+  name: mybuildtrigger
+  properties:
+    description: {{ properties ['trigger-description']}}
+    triggerTemplate:
+      branchName: ".*"
+      projectId: {{ properties['GCP_ProjectId'] }}
+      repoName: {{ properties ['Git_Repository_Name']}}
+    filename: cloudbuild.yaml  # This will be default dont change it
+
+############---Below template will delete the trigger from deployment manger---############
+
+- action: gcp-types/cloudbuild-v1:cloudbuild.projects.triggers.delete
+  metadata:
+    runtimePolicy:
+    - DELETE
+    dependsOn:
+    - mybuildtrigger
+  name: mybuildtrigger-delete
+  properties:
+    projectId: {{ properties['GCP_ProjectId'] }}
+    triggerId: $(ref.mybuildtrigger.id)
+
+
+####--Outputs---###
+outputs:
+- name: projectId
+  value: {{ properties['GCP_ProjectId'] }}
+- name: repoName
+  value: {{ properties ['Git_Repository_Name']}} 

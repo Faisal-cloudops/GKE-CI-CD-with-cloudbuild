@@ -1,0 +1,57 @@
+{% set  NETWORK_NAME = "my-vpc-cluster-custom-network" %} # Make changes here for the Custom VPC setup
+
+
+############---Below template will create VPC & Subnetworks---############
+
+resources:
+- type: compute.v1.network
+  name: {{ NETWORK_NAME }}
+  properties:
+    autoCreateSubnetworks: false
+- name: subnet-a
+  type: compute.v1.subnetwork
+  properties:
+    ipCidrRange: {{ properties ['subnet-a']}}
+    network: $(ref.{{ NETWORK_NAME }}.selfLink)
+    privateIpGoogleAccess: false
+    region: {{properties ['vpc_region'] | default('us-central1') }} 
+- name: subnet-b
+  type: compute.v1.subnetwork
+  properties:
+    ipCidrRange: {{properties ['subnet-b'] }}
+    network: $(ref.{{ NETWORK_NAME }}.selfLink)
+    privateIpGoogleAccess: false
+    region: {{properties ['vpc_region'] | default('us-central1') }}
+
+
+##################---############---Below template will create FIREWALL_RULES---###########################
+
+- name: ssh-{{ NETWORK_NAME }}
+  type: compute.v1.firewall
+  properties:
+    network: $(ref.{{ NETWORK_NAME }}.selfLink)
+    sourceRanges: ["0.0.0.0/0"]
+    allowed:
+    - IPProtocol: TCP
+      ports: ["22"]
+- type: compute.v1.firewall
+  name: default-allow-http-{{ NETWORK_NAME }}
+  properties:
+    network: $(ref.{{ NETWORK_NAME }}.selfLink)
+    targetTags: ["http-server"]
+    sourceRanges: ["0.0.0.0/0"]
+    allowed:
+      - IPProtocol: TCP
+        ports: ["80"]
+
+
+# Declare outputs here
+outputs:
+- name: subnet-a
+  value: {{properties ['subnet-a'] }}
+- name: subnet-b
+  value: {{properties ['subnet-b'] }}
+- name: region
+  value: {{properties ['vpc_region'] | default('us-central1') }} 
+- name: network
+  value: $(ref.{{ NETWORK_NAME }}.selfLink)
