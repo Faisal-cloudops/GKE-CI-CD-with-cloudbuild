@@ -16,8 +16,6 @@ https://github.com/Faisal-cloudops/demo-for-gke/tree/master/welcome-demo-master
 
 4. you can use your own application to do ci-cd deployments
 
-regards
-Faisal Ahmed
-faisal.cloudops@gmail.com
+
 
 
